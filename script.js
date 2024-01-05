@@ -3,14 +3,13 @@
 const boardSize = 8;
 const cellSize = 70;
 const borderWidth = 35;
-var blackScore = 0;
-var whiteScore = 0;
 var currentPlayer = "white";
 var cach = [];
 var white_scores = [];
 var black_scores = [];
 var passage = 0;
 var id = 4;
+var s = [];
 var visited = [];
 var colDict = {
   0: "A",
@@ -22,6 +21,8 @@ var colDict = {
   6: "G",
   7: "H",
 };
+
+s = 0
 
 // Initialisation du stage Konva
 const stage = new Konva.Stage({
@@ -351,18 +352,18 @@ function handleCellClick(row, col) {
 
       id = id + 1;
 
-      score = scoreCalcul(row, col, currentPlayer, visited);
+      score = scoreCalcul(row, col, currentPlayer);
 
       // Changement de joueur actif
       gameHistory(currentPlayer, row, col);
       console.log(currentPlayer + " a joué à : " + row + "," + col);
       currentPlayer = currentPlayer === "black" ? "white" : "black";
 
-      // Mise à jour du panneau de score
-      updateScorePanel();
-
       // Rafraîchir la couche pour afficher le nouveau cercle
       boardLayer.draw();
+      updateScorePanel()
+      endgame(id)
+      
     } else {
       alert("Le nouveau pion doit être adjacent à un pion existant.");
     }
@@ -536,15 +537,17 @@ function scoreCalcul(row, col, color) {
   if (cach[row][col].color == "white") {
     white_scores[cach[row][col].id] = score;
     max = Math.max(...white_scores.filter(Number.isFinite));
-    console.log(`Score ${color} :`, max);
+    document.getElementById("White-score").textContent = `BLANC : ${max}`;
+    document.getElementById("Black-score").classList.toggle("active", currentPlayer === "black");
   }
   if (cach[row][col].color == "black") {
     black_scores[cach[row][col].id] = score;
     max = Math.max(...black_scores.filter(Number.isFinite));
-    console.log(`Score ${color} :`, max);
+    document.getElementById("Black-score").textContent = `NOIR : ${max}`;
+    document.getElementById("White-score").classList.toggle("active", currentPlayer === "white");
   }
 
-  return 0;
+  return s;
 }
 
 // Intitialiser le cach
@@ -622,23 +625,10 @@ function isCellEmptyAt(row, col) {
   return existingCircle;
 }
 
-// Fonction pour mettre à jour les scores
-function updateScores(score) {
-  // Implémentez ici la logique pour mettre à jour les scores en fonction du plateau de jeu
-  // Cela dépend de la logique spécifique d'Othello.
-  // Ici, nous incrémentons simplement le score pour le joueur actif à chaque clic.
-  if (currentPlayer === "black") {
-    blackScore == score;
-  } else {
-    whiteScore == score;
-  }
-}
+
 
 // Fonction pour mettre à jour le panneau de score
 function updateScorePanel() {
-  // Mettre à jour les textes des cartes de score
-  document.getElementById("Black-score").textContent = `NOIR : ${blackScore}`;
-  document.getElementById("White-score").textContent = `BLANC : ${whiteScore}`;
 
   // Mettre en surbrillance la carte de score du joueur actif
   document
@@ -749,9 +739,6 @@ function endgame(id) {
 
 // Appel de la fonction pour créer le plateau de jeu
 createBoard();
-
-// Initialiser le panneau de score
-updateScorePanel();
 
 //initialiser le cach
 cachInitialisation();
